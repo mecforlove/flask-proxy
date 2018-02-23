@@ -61,6 +61,6 @@ class Upstream(object):
                 params=params,
                 headers=headers,
                 data=request.get_data())
-            return resp.content
+            return resp.content, dict(resp.headers)
 
         return _view
