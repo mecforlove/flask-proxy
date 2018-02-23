@@ -53,6 +53,8 @@ class Upstream(object):
             uri = request.url.split(cls.prefix)[1]
             url = base_url + uri
             params = cls.params
+            if callable(params):
+                params = params()
             headers = dict(request.headers)
             headers['Host'] = cls.host
             resp = requests.request(

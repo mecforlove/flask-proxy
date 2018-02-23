@@ -150,6 +150,25 @@ class TestProxy(unittest.TestCase):
                              resp_json_data['url'])
             self.assertEqual({'foo': 'foo'}, resp_json_data['args'])
 
+    def test_add_params_func(self):
+        def params_func():
+            return {'foo': 'foo'}
+
+        class HttpbinGetWithParams(self.HttpbinGet):
+            params = staticmethod(params_func)
+
+        app = Flask(__name__)
+        proxy = Proxy(app)
+        proxy.add_upstream(HttpbinGetWithParams)
+
+        with app.test_client() as client:
+            resp = client.get('/httpbin/get')
+            self.assertEqual('200 OK', resp.status)
+            resp_json_data = json.loads(resp.data)
+            self.assertEqual('http://httpbin.org/get?foo=foo',
+                             resp_json_data['url'])
+            self.assertEqual({'foo': 'foo'}, resp_json_data['args'])
+
     def test_decorators(self):
         def return_ok(func):
             def wrapper(*args, **kwargs):
