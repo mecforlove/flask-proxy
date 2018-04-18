@@ -39,6 +39,7 @@ class Proxy(object):
 
 
 class Upstream(object):
+    host = ''
     scheme = 'http'
     port = 80
     decorators = []
@@ -46,15 +47,18 @@ class Upstream(object):
 
     @classmethod
     def as_view(cls):
-        base_url = '%s://%s:%s' % (cls.scheme, cls.host, cls.port)
 
         def _view(*args, **kwargs):
-            method = request.method
-            uri = request.url.split(cls.prefix)[1]
-            url = base_url + uri
             params = cls.params
+            host = cls.host
             if callable(params):
                 params = params()
+            if callable(host):
+                host = host()
+            method = request.method
+            uri = request.url.split(cls.prefix)[1]
+            base_url = '%s://%s:%s' % (cls.scheme, cls.host, cls.port)
+            url = base_url + uri
             headers = dict(request.headers)
             headers['Host'] = cls.host
             resp = requests.request(
