@@ -66,7 +66,8 @@ class Upstream(object):
                 params=params,
                 headers=headers,
                 data=request.get_data())
-            del resp.headers['Transfer-Encoding']
+            if 'Transfer-Encoding' in resp.headers:
+                resp.headers.pop('Transfer-Encoding')
             return resp.content, dict(resp.headers)
 
         return _view
