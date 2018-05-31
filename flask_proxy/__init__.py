@@ -47,7 +47,6 @@ class Upstream(object):
 
     @classmethod
     def as_view(cls):
-
         def _view(*args, **kwargs):
             params = cls.params
             host = cls.host
@@ -66,7 +65,8 @@ class Upstream(object):
                 url,
                 params=params,
                 headers=headers,
-                data=request.get_data())
-            return resp.content, dict(resp.headers)
+                data=request.get_data(),
+                stream=True)
+            return resp.raw.read(), dict(resp.headers)
 
         return _view
