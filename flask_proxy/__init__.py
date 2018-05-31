@@ -65,8 +65,8 @@ class Upstream(object):
                 url,
                 params=params,
                 headers=headers,
-                data=request.get_data(),
-                stream=True)
-            return resp.raw.read(), dict(resp.headers)
+                data=request.get_data())
+            del resp.headers['Transfer-Encoding']
+            return resp.content, dict(resp.headers)
 
         return _view
