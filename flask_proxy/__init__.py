@@ -1,7 +1,7 @@
 # coding: utf-8
 import requests
 
-from flask import request
+from flask import request, Response
 
 
 class Proxy(object):
@@ -59,6 +59,7 @@ class Upstream(object):
             base_url = '%s://%s:%s' % (cls.scheme, cls.host, cls.port)
             url = base_url + uri
             headers = dict(request.headers)
+            # Change `Host` in request header.
             headers['Host'] = cls.host
             resp = requests.request(
                 method,
@@ -66,8 +67,14 @@ class Upstream(object):
                 params=params,
                 headers=headers,
                 data=request.get_data())
-            if 'Transfer-Encoding' in resp.headers:
-                resp.headers.pop('Transfer-Encoding')
-            return resp.content, dict(resp.headers)
+            # Remove some response headers.
+            excluded_headers = [
+                'content-encoding', 'content-length', 'transfer-encoding',
+                'connection'
+            ]
+            for h in excluded_headers:
+                if h in resp.headers:
+                    resp.headers.pop(h)
+            return Response(resp.content, resp.status_code, dict(resp.headers))
 
         return _view
