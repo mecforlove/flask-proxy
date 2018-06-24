@@ -2,7 +2,7 @@ import re
 from os import path
 from setuptools import setup, find_packages
 
-requirments = ['Flask>=0.1', 'requests>=2.0']
+requirments = ['Flask>=1.0', 'requests>=2.0']
 
 version_file = path.join(
     path.dirname(__file__), 'flask_proxy', '__version__.py')
