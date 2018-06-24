@@ -66,15 +66,16 @@ class Upstream(object):
                 url,
                 params=params,
                 headers=headers,
-                data=request.get_data())
+                data=request.get_data(),
+                stream=True)
             # Remove some response headers.
             excluded_headers = [
-                'content-encoding', 'content-length', 'transfer-encoding',
-                'connection'
+                'content-length', 'transfer-encoding', 'connection'
             ]
             for h in excluded_headers:
                 if h in resp.headers:
                     resp.headers.pop(h)
-            return Response(resp.content, resp.status_code, dict(resp.headers))
+            return Response(resp.raw.read(), resp.status_code,
+                            dict(resp.headers))
 
         return _view
