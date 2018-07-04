@@ -27,8 +27,9 @@ class Proxy(object):
         upstream.endpoint = endpoint
         self.upstreams.append(upstream)
         view_func = upstream.as_view()
-        for dec in upstream.decorators:
-            view_func = dec(view_func)
+        if upstream.decorators:
+            for dec in upstream.decorators:
+                view_func = dec(view_func)
         for route in upstream.routes:
             rule = upstream.prefix + route['url']
             self.app.add_url_rule(
@@ -42,21 +43,25 @@ class Upstream(object):
     host = ''
     scheme = 'http'
     port = 80
-    decorators = []
-    params = {}
+    decorators = None
+    params = None
+
+    @staticmethod
+    def _get_attr(attr, default=None):
+        if callable(attr):
+            return attr() or None
+        return attr or None
 
     @classmethod
     def as_view(cls):
         def _view(*args, **kwargs):
-            params = cls.params
-            host = cls.host
-            if callable(params):
-                params = params()
-            if callable(host):
-                host = host()
+            host = cls._get_attr(cls.host)
+            scheme = cls._get_attr(cls.scheme)
+            params = cls._get_attr(cls.params)
+            port = cls._get_attr(cls.port)
             method = request.method
             uri = request.url.split(cls.prefix)[1]
-            base_url = '%s://%s:%s' % (cls.scheme, cls.host, cls.port)
+            base_url = '%s://%s:%s' % (scheme, host, port)
             url = base_url + uri
             headers = dict(request.headers)
             # Change `Host` in request header.
@@ -75,7 +80,6 @@ class Upstream(object):
             for h in excluded_headers:
                 if h in resp.headers:
                     resp.headers.pop(h)
-            return Response(resp.raw, resp.status_code,
-                            dict(resp.headers))
+            return Response(resp.raw, resp.status_code, dict(resp.headers))
 
         return _view
