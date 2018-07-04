@@ -40,25 +40,25 @@ class Proxy(object):
 
 
 class Upstream(object):
-    host = ''
-    scheme = 'http'
-    port = 80
+    host = None
+    scheme = None
+    port = None
     decorators = None
     params = None
 
     @staticmethod
     def _get_attr(attr, default=None):
         if callable(attr):
-            return attr() or None
-        return attr or None
+            return attr() or default
+        return attr or default
 
     @classmethod
     def as_view(cls):
         def _view(*args, **kwargs):
             host = cls._get_attr(cls.host)
-            scheme = cls._get_attr(cls.scheme)
+            scheme = cls._get_attr(cls.scheme, 'http')
             params = cls._get_attr(cls.params)
-            port = cls._get_attr(cls.port)
+            port = cls._get_attr(cls.port, 80)
             method = request.method
             uri = request.url.split(cls.prefix)[1]
             base_url = '%s://%s:%s' % (scheme, host, port)
