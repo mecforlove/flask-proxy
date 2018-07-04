@@ -65,7 +65,7 @@ class Upstream(object):
             url = base_url + uri
             headers = dict(request.headers)
             # Change `Host` in request header.
-            headers['Host'] = cls.host
+            headers['Host'] = host
             resp = requests.request(
                 method,
                 url,
