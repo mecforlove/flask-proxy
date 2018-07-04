@@ -80,6 +80,6 @@ class Upstream(object):
             for h in excluded_headers:
                 if h in resp.headers:
                     resp.headers.pop(h)
-            return Response(resp.raw, resp.status_code, dict(resp.headers))
+            return Response(resp.raw.read(), resp.status_code, dict(resp.headers))
 
         return _view
