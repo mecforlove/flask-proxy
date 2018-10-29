@@ -187,3 +187,22 @@ class TestProxy(unittest.TestCase):
             resp = client.get('/httpbin/get')
             self.assertEqual('200 OK', resp.status)
             self.assertEqual('ok', resp.data.decode('utf-8'))
+
+    def test_timeout(self):
+        from requests.exceptions import ConnectTimeout
+
+        class HttpbinGetWithTimeout(self.HttpbinGet):
+            timeout = 0.01
+
+        app = Flask(__name__)
+
+        @app.errorhandler(ConnectTimeout)
+        def handle(error):
+            return 'ConnectTimeout'
+
+        proxy = Proxy(app)
+        proxy.add_upstream(HttpbinGetWithTimeout)
+
+        with app.test_client() as client:
+            resp = client.get('/httpbin/get')
+            self.assertIn('ConnectTimeout', resp.data)

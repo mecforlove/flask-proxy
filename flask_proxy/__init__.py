@@ -45,6 +45,7 @@ class Upstream(object):
     port = None
     decorators = None
     params = None
+    timeout = None
 
     @staticmethod
     def _get_attr(attr, default=None):
@@ -59,8 +60,9 @@ class Upstream(object):
             scheme = cls._get_attr(cls.scheme, 'http')
             params = cls._get_attr(cls.params)
             port = cls._get_attr(cls.port, 80)
+            timeout = cls._get_attr(cls.timeout)
             method = request.method
-            uri = request.url.split(cls.prefix)[1]
+            uri = request.url.split(cls.prefix, 1)[1]
             base_url = '%s://%s:%s' % (scheme, host, port)
             url = base_url + uri
             headers = dict(request.headers)
@@ -72,7 +74,8 @@ class Upstream(object):
                 params=params,
                 headers=headers,
                 data=request.get_data(),
-                stream=True)
+                stream=True,
+                timeout=timeout)
             # Remove some response headers.
             excluded_headers = [
                 'content-length', 'transfer-encoding', 'connection'
@@ -80,6 +83,7 @@ class Upstream(object):
             for h in excluded_headers:
                 if h in resp.headers:
                     resp.headers.pop(h)
-            return Response(resp.raw.read(), resp.status_code, dict(resp.headers))
+            return Response(resp.raw.read(), resp.status_code,
+                            dict(resp.headers))
 
         return _view
